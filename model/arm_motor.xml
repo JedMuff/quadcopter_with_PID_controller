@@ -1,0 +1,5 @@
+{% macro arm_motor(name,mass,trans,quat) -%}
+            <site type="box" fromto="0 0 0 {{trans[0]}}  {{trans[1]}} {{trans[2]-0.0075}}" rgba=".3 .3 .8 0.3"/>
+            <site name="{{name}}" type="cylinder" pos="{{trans[0]}}  {{trans[1]}} {{trans[2]}}" size=".01 .0025" quat="{{quat[0]}} {{quat[1]}} {{quat[2]}} {{quat[3]}}" rgba=".3 .8 .3 1"/>
+            <geom type="cylinder" pos="{{trans[0]}}  {{trans[1]}} {{trans[2]+0.005}}" size=".05 .0025" quat="{{quat[0]}} {{quat[1]}} {{quat[2]}} {{quat[3]}}" rgba=".3 .8 .3 0.6" mass="{{mass}}"/>
+{%- endmacro %}

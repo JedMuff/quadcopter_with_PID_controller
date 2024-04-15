@@ -1,0 +1,29 @@
+{% set morph_params=morph_params | default({
+    'num_motors' : 4,
+    'motor_gear' : [-0.1, 0.1, -0.1, 0.1],
+    'motor_trans' : [[  0.0775,  0.0775, 0.0 ],
+                     [  0.0775, -0.0775, 0.0 ],
+                     [ -0.0775, -0.0775, 0.0 ],
+                     [ -0.0775,  0.0775, 0.0 ] ],
+    'motor_quads' : [[ 1.0, 0.0, 0.0, 0.0],
+                     [ 1.0, 0.0, 0.0, 0.0],
+                     [ 1.0, 0.0, 0.0, 0.0],
+                     [ 1.0, 0.0, 0.0, 0.0] ],
+    'motor_names' : ["FR", "BR", "BL", "FL"],
+    'motor_masses' : [0.025, 0.025, 0.025, 0.025],
+    'core_mass' : 0.6,
+    'ixx' : 0.048,
+    'iyy' : 0.048,
+    'izz' : 0.048,
+    'ixy' : 0.0,
+    'ixz' : 0.0,
+    'iyz' : 0.0 
+    
+}) %}
+
+{% set morph_limits=morph_limits | default({
+    'num_motors' : [2, 8],
+    'motor_x_pos' : [0.01, 0.1],
+    'motor_y_pos' : [0.01, 0.1],
+    'motor_z_pos' : [0.01, 0.1]
+}) %}
