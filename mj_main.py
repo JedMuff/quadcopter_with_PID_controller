@@ -71,6 +71,10 @@ for time in enumerate(time_index):
         mag_acc = 1
     
     #use desired acceleration to find desired angles since the quad can only move via changing angles
+    print(f"-des_acc[1]: {-des_acc[1]}")
+    print(f"mag_acc: {mag_acc}")
+    print(f"quadcopter.angle[1]: {quadcopter.angle[1]}")
+    print(-des_acc[1] / mag_acc / math.cos(quadcopter.angle[1]))
     ang_des = [math.asin(-des_acc[1] / mag_acc / math.cos(quadcopter.angle[1])),
         math.asin(des_acc[0] / mag_acc),
          0]

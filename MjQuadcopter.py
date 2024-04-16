@@ -41,7 +41,8 @@ def euler_from_quaternion(x, y, z, w):
         t3 = +2.0 * (w * z + x * y)
         t4 = +1.0 - 2.0 * (y * y + z * z)
         yaw_z = np.arctan2(t3, t4)
-     
+
+        print(roll_x*(180/np.pi), pitch_y*(180/np.pi), yaw_z*(180/np.pi))
         return [roll_x, pitch_y, yaw_z] # in radians
 
 class Quadcopter():
@@ -146,13 +147,13 @@ class Quadcopter():
     @property
     def angle(self):
         q = self.sim.data.xquat[self.core_id]
-        angle = euler_from_quaternion(q[0], q[1], q[2], q[3])
+        angle = euler_from_quaternion(q[1], q[2], q[3], q[0])
         return np.array(angle)
     
     @angle.setter
     def angle(self, angle):
         q = get_quaternion_from_euler(angle[0], angle[1], angle[2])
-        self.sim.data.qpos[3:7]= q
+        self.sim.data.qpos[3:7]= [q[3], q[0], q[1], q[2]]
 
     @property
     def ang_vel(self):
@@ -162,8 +163,8 @@ class Quadcopter():
 
     @ang_vel.setter
     def ang_vel(self, ang_vel):
-        q = get_quaternion_from_euler(ang_vel[0], ang_vel[1], ang_vel[2])
-        self.sim.data.qpos[3:7]= q
+        # q = get_quaternion_from_euler(ang_vel[0], ang_vel[1], ang_vel[2])
+        self.sim.data.qvel[3:6]= ang_vel#[q[3], q[0], q[1], q[2]]
 
     def calc_pos_error(self):
         return self.pos_ref - self.pos
@@ -302,7 +303,6 @@ class Quadcopter():
         self.thrust = self.kt * np.sum(self.speeds)
         thrust_all = np.array(self.speeds) * (self.kt)
         self.sim.data.ctrl[:] = thrust_all # Apply thrust
-        print(thrust_all)
         #Linear and angular accelerations in inertial frame
         self.find_lin_acc()
 
