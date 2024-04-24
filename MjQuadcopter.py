@@ -42,20 +42,19 @@ def euler_from_quaternion(x, y, z, w):
         t4 = +1.0 - 2.0 * (y * y + z * z)
         yaw_z = np.arctan2(t3, t4)
 
-        print(roll_x*(180/np.pi), pitch_y*(180/np.pi), yaw_z*(180/np.pi))
         return [roll_x, pitch_y, yaw_z] # in radians
 
 class Quadcopter():
 
-    def __init__(self, pos, vel, angle, ang_vel, pos_ref):
+    def __init__(self, pos, vel, angle, ang_vel, pos_ref, dt):
 
         self.sim = MujocoSim("model")
 
         L = 0.2 # length from body center to prop center, m
-        
+        gear = 0.0201
         morph_params = {
             'num_motors' : 4, # number of motors on the vehicle
-            'motor_gear' : [-0.1, 0.1, -0.1, 0.1],
+            'motor_gear' : [gear, -gear, gear, -gear],
             'motor_trans' : [[  L,  L, 0.0 ],
                             [  L, -L, 0.0 ],
                             [ -L, -L, 0.0 ],
@@ -65,22 +64,24 @@ class Quadcopter():
                             [ 1.0, 0.0, 0.0, 0.0],
                             [ 1.0, 0.0, 0.0, 0.0] ],
             'motor_names' : ["FR", "BR", "BL", "FL"],
-            'motor_masses' : [0.025, 0.025, 0.025, 0.025],
-            'core_mass' : 0.406, # total mass of the vehicle, kg
+            'motor_masses' : [0.005, 0.005, 0.005, 0.005],
+            'core_mass' : 0.506, # total mass of the vehicle, kg
             'ixx' : 8.11858e-5,
             'iyy' : 8.11858e-5,
             'izz' : 6.12233e-5,
             'ixy' : 0.0,
             'ixz' : 0.0,
-            'iyz' : 0.0 
+            'iyz' : 0.0,
+            'goal_pos' : pos_ref
         }
 
-        self.sim.build_morphological_file(morph_params=morph_params, asarray=False)
+        self.sim.build_sim(morph_params=morph_params, asarray=False)
         self.sim.sim_reset()
         self.sim.init_viewer()
-      
+
         # Initial Sim variables
-        self.pos = pos  # position of vehicle in inertial frame [x,y,z], meters
+        self._pos = pos  # position of vehicle in inertial frame [x,y,z], meters
+        self.sim.data.qpos[0:3]= pos
         self.vel = vel  #velocity of vehicle in inertial frame [x_dot, y_dot, z_dot], m/s
         self.angle = angle # orintation of vehicle inertial frame in radians [roll, pitch, yaw] -> [phi, theta, psi]
         self.ang_vel = ang_vel # angular velocity of inertial angles in rads/sec [phi_dot, theta_dot, psi_dot]
@@ -116,15 +117,16 @@ class Quadcopter():
         self.Cd = 1 # drag coefficient
         self.thrust = self.mass * gravity
         self.speeds = np.ones(morph_params["num_motors"]) * ((morph_params["core_mass"] * gravity) / (self.kt * morph_params["num_motors"])) # initial speeds of motors
-        self.tau = np.zeros(3) # JM: Initial torque?
+        self.tau = np.array([-9.72637046e-06, -4.86300202e-06,  0.00000000e+00]) # JM: Initial torque?
 
-        self.maxT = 1 #  max thrust from any single motor, N
-        self.minT = 0. # min thrust from any single motor, N 
+        self.maxT = 16.5 #  max thrust from any single motor, N
+        self.minT = 0.5 # min thrust from any single motor, N 
 
         self.I = np.array([[self.Ixx, 0, 0],[0, self.Iyy, 0],[0, 0, self.Izz]])
         self.g = np.array([0, 0, -gravity])
 
         self.core_id = self.sim.get_id("core", "body")
+        self.max_angle = np.pi/12 #radians, max angle allowed at any time step
 
     @property
     def pos(self):
@@ -132,10 +134,12 @@ class Quadcopter():
     
     @pos.setter
     def pos(self, pos):
+        self._pos = pos
         self.sim.data.qpos[0:3]= pos
 
     @property
     def vel(self):
+        # return self._vel
         vel = np.zeros(6)
         mujoco.mj_objectVelocity(self.sim.model, self.sim.data, mujoco.mjtObj.mjOBJ_BODY, self.core_id, vel, 0) # angular velocities, linear velocities 
         return vel[3:6]
@@ -164,19 +168,27 @@ class Quadcopter():
     @ang_vel.setter
     def ang_vel(self, ang_vel):
         # q = get_quaternion_from_euler(ang_vel[0], ang_vel[1], ang_vel[2])
-        self.sim.data.qvel[3:6]= ang_vel#[q[3], q[0], q[1], q[2]]
+        self.sim.data.qvel[3:6]= ang_vel #[q[3], q[0], q[1], q[2]]
 
-    def calc_pos_error(self):
-        return self.pos_ref - self.pos
+    def calc_pos_error(self, pos):
+        ''' Returns the error between actual position and reference position'''
+        pos_error = self.pos_ref - pos
+        return pos_error
         
-    def calc_vel_error(self):
-        return self.vel_ref - self.vel
+    def calc_vel_error(self, vel):
+        ''' Returns the error between actual velocity and reference velocity'''
+        vel_error = self.vel_ref - vel
+        return vel_error
 
-    def calc_ang_error(self):
-        return self.angle_ref - self.angle
+    def calc_ang_error(self, angle):
+        ''' Returns the error between actual angle and reference angle'''
+        angle_error = self.angle_ref - angle
+        return angle_error
 
-    def calc_ang_vel_error(self):
-        return self.ang_vel_ref - self.ang_vel
+    def calc_ang_vel_error(self, ang_vel):
+        ''' Returns the error between angular velocity position and reference angular velocity'''
+        ang_vel_error = self.ang_vel_ref - ang_vel
+        return ang_vel_error
 
 
     def body2inertial_rotation(self):
@@ -227,13 +239,15 @@ class Quadcopter():
 
         E_dot = np.matmul(R, omega_dot)
         self.ang_acc = E_dot
-
+        
 
     def find_omegadot(self, omega):
         ''' Find the angular acceleration in the inertial frame in rad/s '''
         omega = self.thetadot2omega() 
-        #omega_dot = np.matmul(np.linalg.inv(self.I), (self.tau - np.cross(omega, np.matmul(self.I, omega))))
+        
+        # omega_dot = np.matmul(np.linalg.inv(self.I), (self.tau - np.cross(omega, np.matmul(self.I, omega))))
         omega_dot = np.linalg.inv(self.I).dot(self.tau - np.cross(omega, np.matmul(self.I, omega)))
+
         return omega_dot
 
 
@@ -259,8 +273,8 @@ class Quadcopter():
         ''' finds speeds of motors to achieve a desired thrust and torque '''
 
         # Needed torque on body
-        e1 = tau_des[0] * self.Ixx
-        e2 = tau_des[1] * self.Iyy
+        e1 = tau_des[0] * self.Ixx * 10_000
+        e2 = tau_des[1] * self.Iyy * 10_000
         e3 = tau_des[2] * self.Izz
 
         #less typing
@@ -275,9 +289,9 @@ class Quadcopter():
         motor_speeds.append(weight_speed - (e1/((n/2)*self.kt*self.L)) + (e3/(n*self.b_prop)))
         motor_speeds.append(weight_speed + (e2/((n/2)*self.kt*self.L)) - (e3/(n*self.b_prop)))
         motor_speeds.append(weight_speed + (e1/((n/2)*self.kt*self.L)) + (e3/(n*self.b_prop)))
-
         # Ensure that desired thrust is within overall min and max of all motors
         thrust_all = np.array(motor_speeds) * (self.kt)
+        self.thrust_all = thrust_all
         over_max = np.argwhere(thrust_all > self.maxT)
         under_min = np.argwhere(thrust_all < self.minT)
 
@@ -292,17 +306,19 @@ class Quadcopter():
 
     def find_body_torque(self):
         tau = np.array([(self.L * self.kt * (self.speeds[3] - self.speeds[1])),
-          (self.L * self.kt * (self.speeds[2] - self.speeds[0])),
-          (self.b_prop * (-self.speeds[0] + self.speeds[1] - self.speeds[2] + self.speeds[3]))])
-
+                        (self.L * self.kt * (self.speeds[2] - self.speeds[0])),
+                        (self.b_prop * (-self.speeds[0] + self.speeds[1] - self.speeds[2] + self.speeds[3]))])
+        
         self.tau = tau
 
 
     def step(self):
         #Thrust of motors
         self.thrust = self.kt * np.sum(self.speeds)
-        thrust_all = np.array(self.speeds) * (self.kt)
-        self.sim.data.ctrl[:] = thrust_all # Apply thrust
+
+        tau = np.array(self.speeds)*self.b_prop
+
+        self.sim.data.ctrl[:] = tau#self.thrust_all # Apply thrust
         #Linear and angular accelerations in inertial frame
         self.find_lin_acc()
 
@@ -315,8 +331,14 @@ class Quadcopter():
 
         #Angular acceleration in body frame
         self.omegadot2Edot(omega_dot)
-
+        
         # Update states based on time step
+        ## Can comment this in and remove motor control above for debugging. This is how a step was done without Mujoco. ##
+        # self.ang_vel += self.dt * self.ang_acc
+        # self.angle += self.dt * self.ang_vel
+        # self.vel += self.dt * self.lin_acc
+        # self.pos = self.pos + self.dt * self.vel
+        # self.sim.data.qpos[0:3]= self.pos
         self.sim.sim_step()
         self.sim.render_sim()
 

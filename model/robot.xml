@@ -30,13 +30,13 @@
 
         </body>
 
-        <site name="z_axis" type="sphere" pos="0.0 0.5 3.0" size=".1 .1 .1" quat="0 0 0 1" rgba="0 0 1 0.5"/>
+        <site name="z_axis" type="sphere" pos="{{mp["goal_pos"][0]}} {{mp["goal_pos"][1]}} {{mp["goal_pos"][2]}}" size=".1 .1 .1" quat="0 0 0 1" rgba="0 0 1 0.5"/>
 
     </worldbody>
 
     <actuator>
         {% for i in range(mp["num_motors"]) %}
-        <motor ctrllimited="true" ctrlrange="0. 1." gear="0 0 1 0 0 {{mp["motor_gear"][i]}}" site="{{mp["motor_names"][i]}}"/>
+        <motor gear="0 0 1 0 0 {{mp["motor_gear"][i]}}" site="{{mp["motor_names"][i]}}"/>
         {% endfor %}
     </actuator>
 
