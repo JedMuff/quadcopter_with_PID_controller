@@ -21,43 +21,43 @@
         <geom conaffinity="1" condim="3" material="MatPlane" name="floor" pos="0 0 0" rgba="0.4 0.3 0.3 1" size="5 5 0.2" type="plane"/>
 
         <body name="core" pos="0 0 0">
-            <inertial pos="0 0 0" mass="0.406" fullinertia="8.11858e-05 8.11858e-05 6.12233e-05 0.0 0.0 0.0"/>
+            <inertial pos="0 0 0" mass="0.506" fullinertia="8.11858e-05 8.11858e-05 6.12233e-05 0.0 0.0 0.0"/>
             <joint name="root" type="free" damping="0" armature="0" pos="0 0 0" limited="false"/>
 
             <geom name="core_geom" type="box" pos="0 0 0" quat="1 0 0 0" size=".02 .02 .02" rgba=".3 .3 .8 1"/>
             
             <site type="box" fromto="0 0 0 0.2  0.2 -0.0075" rgba=".3 .3 .8 0.3"/>
             <site name="FR" type="cylinder" pos="0.2  0.2 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
-            <geom type="cylinder" pos="0.2  0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.025"/>
+            <geom type="cylinder" pos="0.2  0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
             
             <site type="box" fromto="0 0 0 0.2  -0.2 -0.0075" rgba=".3 .3 .8 0.3"/>
             <site name="BR" type="cylinder" pos="0.2  -0.2 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
-            <geom type="cylinder" pos="0.2  -0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.025"/>
+            <geom type="cylinder" pos="0.2  -0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
             
             <site type="box" fromto="0 0 0 -0.2  -0.2 -0.0075" rgba=".3 .3 .8 0.3"/>
             <site name="BL" type="cylinder" pos="-0.2  -0.2 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
-            <geom type="cylinder" pos="-0.2  -0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.025"/>
+            <geom type="cylinder" pos="-0.2  -0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
             
             <site type="box" fromto="0 0 0 -0.2  0.2 -0.0075" rgba=".3 .3 .8 0.3"/>
             <site name="FL" type="cylinder" pos="-0.2  0.2 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
-            <geom type="cylinder" pos="-0.2  0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.025"/>
+            <geom type="cylinder" pos="-0.2  0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
             
 
         </body>
 
-        <site name="z_axis" type="sphere" pos="0.0 0.5 3.0" size=".1 .1 .1" quat="0 0 0 1" rgba="0 0 1 0.5"/>
+        <site name="z_axis" type="sphere" pos="1.0 0.5 0.5" size=".1 .1 .1" quat="0 0 0 1" rgba="0 0 1 0.5"/>
 
     </worldbody>
 
     <actuator>
         
-        <motor ctrllimited="true" ctrlrange="0. 1." gear="0 0 1 0 0 -0.1" site="FR"/>
+        <motor gear="0 0 1 0 0 0.0201" site="FR"/>
         
-        <motor ctrllimited="true" ctrlrange="0. 1." gear="0 0 1 0 0 0.1" site="BR"/>
+        <motor gear="0 0 1 0 0 -0.0201" site="BR"/>
         
-        <motor ctrllimited="true" ctrlrange="0. 1." gear="0 0 1 0 0 -0.1" site="BL"/>
+        <motor gear="0 0 1 0 0 0.0201" site="BL"/>
         
-        <motor ctrllimited="true" ctrlrange="0. 1." gear="0 0 1 0 0 0.1" site="FL"/>
+        <motor gear="0 0 1 0 0 -0.0201" site="FL"/>
         
     </actuator>
 

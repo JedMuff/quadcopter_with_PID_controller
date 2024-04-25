@@ -305,6 +305,8 @@ def total_plot():
     plt.show()
 
 write_init_ang_vel_to_screen()
-#error_plot()
+index = max([index for index,value in enumerate(total_error) if value > 1.0e-1])
+print ('settling time:',time_index[index])
+error_plot()
 #simple_plot()
 total_plot()
