@@ -8,7 +8,7 @@ import scipy.optimize
 import opal_py3 as opal
 
 # Import custom quadcopter and controller classes
-from MjQuadcopter_opt import Quadcopter
+from MjQuadcopter_opt2 import Quadcopter
 from PID_Controller import PID_Controller
 
 #sim run time
@@ -34,7 +34,7 @@ ang = np.array([0., 0., 0.]) #initial Euler angles [phi, theta, psi] relative to
 # ang_vel = np.deg2rad(2* deviation * random_set - deviation) #initial angular velocity [phi_dot, theta_dot, psi_dot]
 ang_vel = np.array([0.0, 0.0, 0.0]) #initial angular velocity [phi_dot, theta_dot, psi_dot]
 
-gravity = 9.8 # acceleration due to gravity, m/s^2
+gravity = 9.81 # acceleration due to gravity, m/s^2
 def obj_fun(params, target=1.0,render=False):
     # Gains for position controller
     #Kp_pos = [100.95, 100.95, 656.6] # proportional [x,y,z]
@@ -57,7 +57,7 @@ def obj_fun(params, target=1.0,render=False):
     Ki_sat_ang = 0.1*np.ones(3)  # saturation for integral controller (prevent windup) [x,y,z]
 
     # Create quadcotper with position and angle controller objects
-    quadcopter = Quadcopter(pos,vel,ang,ang_vel,r_ref, 0.01,render)
+    quadcopter = Quadcopter(pos,vel,ang,ang_vel,r_ref, 0.01,dL=params[18],render=render)
     pos_controller = PID_Controller(Kp_pos, Kd_pos, Ki_pos, Ki_sat_pos, dt)
     angle_controller = PID_Controller(Kp_ang, Kd_ang, Ki_ang, Ki_sat_ang, dt)
 
@@ -189,6 +189,9 @@ def obj_fun(params, target=1.0,render=False):
         total_error.append(np.linalg.norm(r_error))
     obj_val = np.abs(settling_time()-target)
     #obj_val = settling_time()
+    print('Ixx = ',quadcopter.Ixx)
+    print('Iyy = ',quadcopter.Iyy)
+    print('Izz = ',quadcopter.Izz)
     print('obj_val:',obj_val)
     return [params, obj_val, ang_vel, total_error, position, velocity, angle, angle_vel, motor_thrust, body_torque, total_thrust, settling_time()]
 #           [0]     [1]      [2]      [3]          [4]       [5]       [6]    [7]        [8]           [9]          [10]
@@ -365,23 +368,24 @@ params0 = [100.95, 100.95, 656.6, \
           1.2, 1.2, 1.0, \
           56.9, 56.9, 25., \
           7.7, 7.7, 9., \
-          0.5, 0.5, 0.1]
+          0.5, 0.5, 0.1,0.0]
 bounds = [(50,200),(50,200),(300,900),\
-          (10,30),(10,30),(10,30), \
-          (0.5,3.0),(0.5,3.0),(0.5,3.0), \
+          (10,30),(10,30),(10,100), \
+          (0.5,3.0),(0.5,3.0),(0.5,10.0), \
           (30,90),(30,90),(30,90), \
           (3,12),(3,12),(3,12), \
-          (0.25,1.0),(0.25,1.0),(0.25,1.0)]
+          (0.25,2.0),(0.25,2.0),(0.25,2.0),(-0.1,0.1)]
 if __name__ == "__main__":
-    methods =['DE','DE_warm']
-    params_dic={'Initial':params0}; res_his={}
+    methods =['DE']
+    params_dic={}; res_his={}
     for method in methods: #'Powell', 'Nelder-Mead', 'COBYLA', 'SPSA', 'EGO', 'CMA-ES', 'DE', 'PSO'
         if method in ['Powell','Nelder-Mead','COBYLA']:
             res=scipy.optimize.minimize(obj_fun1, params0, args=(), method=method, jac=None, hess=None, hessp=None, bounds=bounds, constraints=(), tol=None, callback=None, options={'maxiter': 3})
             params_dic[method] = res.x
         elif method == 'DE':
-            res=opal.de(obj_fun2, len(params0), X=None, bounds=bounds, gaptol=1.0e-06, pop=30, Cr=0.65, F=0.75, dither=True, IniNfeval=0, maxiter=5000, endMinf=1e-6, endMaxf=1e-6, maxNfeval=120, args=())
+            res=opal.de(obj_fun2, len(params0), X=None, bounds=bounds, gaptol=1.0e-06, pop=30, Cr=0.65, F=0.75, dither=True, IniNfeval=0, maxiter=5000, endMinf=1e-6, endMaxf=1e-6, maxNfeval=3000, args=())
             params_dic[method]=res[0]
+            print('history: ',res[5])
             res_his[method]=np.array(res[5])[:,1]
         elif method == 'DE_warm':
             a=np.zeros([1,len(params0)])
@@ -392,7 +396,7 @@ if __name__ == "__main__":
             res_his[method]=np.array(res[5])[:,1]
     print('initial params: ',params0)
     print('optimal params: ',params_dic)
-    #r = obj_fun(params0, render=True)
+    r = obj_fun(params0, render=True)
     for method in list(params_dic.keys()):
         r = obj_fun(params_dic[method], render=True)
         print ('settling time (%s):'%method,r[11])

@@ -46,14 +46,25 @@ def euler_from_quaternion(x, y, z, w):
 
 class Quadcopter():
 
-    def __init__(self, pos, vel, angle, ang_vel, pos_ref, dt, render=False):
+    def __init__(self, pos, vel, angle, ang_vel, pos_ref, dt, dL=0.0, render=False):
 
         self.sim = MujocoSim("model")
         self.render = render
-        L = 0.2 # length from body center to prop center, m
-        gear = 0.0201
+        #L = 0.2 # length from body center to prop center, m
+        L= 0.2+dL
+        num_motors = 4
+        mc = 0.1 # core mass
+        mm = 0.005 # motor masses
+        a = 0.01 #width of core
+        b = 0.01 #length of core
+        l = 0.01 #thickness of core
+
+        #gear = 0.0201
+        gear = 0.00001
+        #dixx = np.sign(dL)*num_motors*mm*dL**2
+        #diyy = np.sign(dL)*num_motors*mm*dL**2
         morph_params = {
-            'num_motors' : 4, # number of motors on the vehicle
+            'num_motors' : num_motors, # number of motors on the vehicle
             'motor_gear' : [gear, -gear, gear, -gear],
             'motor_trans' : [[  L,  L, 0.0 ],
                             [  L, -L, 0.0 ],
@@ -64,11 +75,11 @@ class Quadcopter():
                             [ 1.0, 0.0, 0.0, 0.0],
                             [ 1.0, 0.0, 0.0, 0.0] ],
             'motor_names' : ["FR", "BR", "BL", "FL"],
-            'motor_masses' : [0.005, 0.005, 0.005, 0.005],
-            'core_mass' : 0.506, # total mass of the vehicle, kg
-            'ixx' : 8.11858e-5,
-            'iyy' : 8.11858e-5,
-            'izz' : 6.12233e-5,
+            'motor_masses' : [mm, mm, mm, mm],
+            'core_mass' : mc, # total mass of the vehicle, kg
+            'ixx' : 0.5*((1./12.)*mc*(a**2+l**2)+num_motors*mm*L**2),
+            'iyy' : 0.5*((1./12.)*mc*(b**2+l**2)+num_motors*mm*L**2),
+            'izz' : 0.5*((1./12.)*mc*(a**2+b**2)+num_motors*mm*2*L**2),
             'ixy' : 0.0,
             'ixz' : 0.0,
             'iyz' : 0.0,
@@ -101,7 +112,7 @@ class Quadcopter():
         self.dt = self.sim.dt
        
         #Environment variables
-        gravity = 9.8 # acceleration due to gravity, m/s^2
+        gravity = 9.81 # acceleration due to gravity, m/s^2
         self.density = 1.225 # air density, kg/m^3
 
         # Vehicle constants
@@ -120,9 +131,10 @@ class Quadcopter():
         self.speeds = np.ones(morph_params["num_motors"]) * ((morph_params["core_mass"] * gravity) / (self.kt * morph_params["num_motors"])) # initial speeds of motors
         self.tau = np.array([-9.72637046e-06, -4.86300202e-06,  0.00000000e+00]) # JM: Initial torque?
 
-        self.maxT = 16.5 #  max thrust from any single motor, N
-        self.minT = 0.5 # min thrust from any single motor, N 
-
+        #self.maxT = 16.5 #  max thrust from any single motor, N
+        self.maxT = 17
+        self.minT = 0.5 # min thrust from any single motor, N
+        #self.minT = 0.05
         self.I = np.array([[self.Ixx, 0, 0],[0, self.Iyy, 0],[0, 0, self.Izz]])
         self.g = np.array([0, 0, -gravity])
 

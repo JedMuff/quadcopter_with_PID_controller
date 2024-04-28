@@ -21,26 +21,26 @@
         <geom conaffinity="1" condim="3" material="MatPlane" name="floor" pos="0 0 0" rgba="0.4 0.3 0.3 1" size="5 5 0.2" type="plane"/>
 
         <body name="core" pos="0 0 0">
-            <inertial pos="0 0 0" mass="0.506" fullinertia="8.11858e-05 8.11858e-05 6.12233e-05 0.0 0.0 0.0"/>
+            <inertial pos="0 0 0" mass="0.1" fullinertia="0.0003046072550073776 0.0003046072550073776 0.000608381176681422 0.0 0.0 0.0"/>
             <joint name="root" type="free" damping="0" armature="0" pos="0 0 0" limited="false"/>
 
             <geom name="core_geom" type="box" pos="0 0 0" quat="1 0 0 0" size=".02 .02 .02" rgba=".3 .3 .8 1"/>
             
-            <site type="box" fromto="0 0 0 0.2  0.2 -0.0075" rgba=".3 .3 .8 0.3"/>
-            <site name="FR" type="cylinder" pos="0.2  0.2 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
-            <geom type="cylinder" pos="0.2  0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
+            <site type="box" fromto="0 0 0 0.17429111327719618  0.17429111327719618 -0.0075" rgba=".3 .3 .8 0.3"/>
+            <site name="FR" type="cylinder" pos="0.17429111327719618  0.17429111327719618 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
+            <geom type="cylinder" pos="0.17429111327719618  0.17429111327719618 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
             
-            <site type="box" fromto="0 0 0 0.2  -0.2 -0.0075" rgba=".3 .3 .8 0.3"/>
-            <site name="BR" type="cylinder" pos="0.2  -0.2 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
-            <geom type="cylinder" pos="0.2  -0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
+            <site type="box" fromto="0 0 0 0.17429111327719618  -0.17429111327719618 -0.0075" rgba=".3 .3 .8 0.3"/>
+            <site name="BR" type="cylinder" pos="0.17429111327719618  -0.17429111327719618 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
+            <geom type="cylinder" pos="0.17429111327719618  -0.17429111327719618 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
             
-            <site type="box" fromto="0 0 0 -0.2  -0.2 -0.0075" rgba=".3 .3 .8 0.3"/>
-            <site name="BL" type="cylinder" pos="-0.2  -0.2 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
-            <geom type="cylinder" pos="-0.2  -0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
+            <site type="box" fromto="0 0 0 -0.17429111327719618  -0.17429111327719618 -0.0075" rgba=".3 .3 .8 0.3"/>
+            <site name="BL" type="cylinder" pos="-0.17429111327719618  -0.17429111327719618 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
+            <geom type="cylinder" pos="-0.17429111327719618  -0.17429111327719618 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
             
-            <site type="box" fromto="0 0 0 -0.2  0.2 -0.0075" rgba=".3 .3 .8 0.3"/>
-            <site name="FL" type="cylinder" pos="-0.2  0.2 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
-            <geom type="cylinder" pos="-0.2  0.2 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
+            <site type="box" fromto="0 0 0 -0.17429111327719618  0.17429111327719618 -0.0075" rgba=".3 .3 .8 0.3"/>
+            <site name="FL" type="cylinder" pos="-0.17429111327719618  0.17429111327719618 0.0" size=".01 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 1"/>
+            <geom type="cylinder" pos="-0.17429111327719618  0.17429111327719618 0.005" size=".05 .0025" quat="1.0 0.0 0.0 0.0" rgba=".3 .8 .3 0.6" mass="0.005"/>
             
 
         </body>
@@ -51,13 +51,13 @@
 
     <actuator>
         
-        <motor gear="0 0 1 0 0 0.0201" site="FR"/>
+        <motor gear="0 0 1 0 0 1e-05" site="FR"/>
         
-        <motor gear="0 0 1 0 0 -0.0201" site="BR"/>
+        <motor gear="0 0 1 0 0 -1e-05" site="BR"/>
         
-        <motor gear="0 0 1 0 0 0.0201" site="BL"/>
+        <motor gear="0 0 1 0 0 1e-05" site="BL"/>
         
-        <motor gear="0 0 1 0 0 -0.0201" site="FL"/>
+        <motor gear="0 0 1 0 0 -1e-05" site="FL"/>
         
     </actuator>
 

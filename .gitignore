@@ -10,6 +10,8 @@ launch.json
 # pycash
 __pycashe__/*
 *.pyc
-
+# output files
+*.pdf
+*.p
 # itself
 .gitignore

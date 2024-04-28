@@ -909,9 +909,9 @@ def de(func2, Npar, X=None, bounds=None, gaptol=1.0e-06, pop=50, Cr=0.65, F=0.75
                     r=v
                     index=l
         return [r, index]
-    if X != None:
+    try:
         Npar = len(X[0])
-    else:
+    except:
         X=[]
     Niter=maxiter
     Xmax=list()
@@ -932,6 +932,8 @@ def de(func2, Npar, X=None, bounds=None, gaptol=1.0e-06, pop=50, Cr=0.65, F=0.75
         for m in range(0,Npar):#Each population consists of Npar parameters
             xl.append(numpy.random.uniform(Xmin[m],Xmax[m]))
         X.append(xl)
+    if max([0,pop-len(X)]) == 0: #20240426
+        xl=list(X[0]) #20240426
     Y=list()
     pop=len(X)
     for l in range(0,pop): #For every population, calculate the response Y for each population
